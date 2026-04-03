@@ -26,7 +26,7 @@ export default createWorkflow(workflowId, 'Protocol Registry')
 
     root
       // Phase 1: Enable Monitors
-      .parallel('enable-monitors', (p) => {
+      .parallel('enable-monitors', (p: any) => {
         p.maxConcurrency(maxConcurrency)
           .failFast(false)
           .tool('enable-network', 'network_enable', { input: { enableExceptions: true } })
@@ -37,10 +37,14 @@ export default createWorkflow(workflowId, 'Protocol Registry')
 
       // Phase 2: Navigate & Wait
       .tool('navigate', 'page_navigate', { input: { url, waitUntil } })
-      .tool('wait-activity', 'page_wait_for_timeout', { input: { timeout: captureDelay } })
+      .tool('wait-activity', 'console_execute', {
+        input: {
+          expression: `(async () => { await new Promise(r => setTimeout(r, ${captureDelay})); return 'done'; })()`,
+        },
+      })
 
       // Phase 3: Parallel Channel Collection
-      .parallel('collect-channels', (p) => {
+      .parallel('collect-channels', (p: any) => {
         p.maxConcurrency(maxConcurrency)
           .failFast(false)
           .tool('get-requests', 'network_get_requests', { input: { tail: requestTail } })

@@ -73,23 +73,15 @@ export default createWorkflow(workflowId, 'Protocol Registry')
         },
       })
 
-      // Phase 5: Handler Location
-      .tool('locate-handlers', 'extract_function_tree', {
-        input: { targetParam: 'addEventListener', depth: 2 },
-      })
+      // Phase 5: Handler Location (skip - requires scriptId from collect-channels)
+      // .tool('locate-handlers', 'extract_function_tree', {
+      //   input: { targetParam: 'addEventListener', depth: 2 },
+      // })
 
-      // Phase 6: Evidence Recording
-      .tool('create-evidence-session', 'instrumentation_session_create', {
+      // Phase 6: Session Summary
+      .tool('emit-summary', 'console_execute', {
         input: {
-          name: `protocol-registry-${new Date().toISOString().slice(0, 10)}`,
-          metadata: { url, workflowId },
-        },
-      })
-      .tool('record-artifact', 'instrumentation_artifact_record', {
-        input: {
-          type: 'protocol_registry',
-          label: `Protocol registry for ${url}`,
-          metadata: { url, requestTail, maxFrames },
+          expression: `(${JSON.stringify({ status: 'protocol_registry_complete', url, captureDelay })})`,
         },
       })
 
